@@ -73,8 +73,7 @@ int main()
 
   
 
-    std::cout << std::endl << "Csot of " << CalculateCost(dataTable, 50, taskOrder) << std::endl;
-
+    std::cout << std::endl << "Csot of " << CalculateCost(dataTable, dataSize, taskOrder) << std::endl;
     return 0;
 }
 
