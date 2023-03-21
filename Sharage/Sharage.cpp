@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <fstream>
 #include <string>
+#include <chrono>
 
 #include "Task.h"
 #include "PriorityQueue.h"
@@ -57,7 +58,7 @@ Task* LoadData(std::string dataFilePath, std::string dataLabel, int& dataSizeHan
 
 }
 
-template<typename T> int CalculateCost(Task* dataTable,int dataSize, Comparator* compareByDeliveryTime, Comparator* compareByCoolingTime)
+template<typename T> int CalculateCost(Task* dataTable,int dataSize,int &timerHandle , Comparator* compareByDeliveryTime, Comparator* compareByCoolingTime)
 {
     int uCost = 0;
     int tCost = 0;
@@ -65,6 +66,8 @@ template<typename T> int CalculateCost(Task* dataTable,int dataSize, Comparator*
     
     PriorityQueue* pQueue = new T(compareByDeliveryTime);
     PriorityQueue* redyTask = new T(compareByCoolingTime);
+
+    auto start = std::chrono::high_resolution_clock::now();
 
     for (int i = 0; i < dataSize; i++)
     {
@@ -90,6 +93,9 @@ template<typename T> int CalculateCost(Task* dataTable,int dataSize, Comparator*
 
     }
 
+    auto stop = std::chrono::high_resolution_clock::now();
+    timerHandle = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
+  
     delete redyTask;
     return uCost;
 }
@@ -99,27 +105,26 @@ int main()
    
     int dataSize;
     int okValue;
+    int timerOutput;
 
     Comparator* compareByDeliveryTime = new CompareByDeliveryTime();
     Comparator* compareByCoolingTime  = new CompareByCoolingTime();
 
     PriorityQueue* pQueue = new LinkedListQueue(compareByDeliveryTime);
     
+    std::cout << "\n\n";
+
     //----------------------------------
-    for (int i = 0; i < 8; i++)
+    for (int i = 1; i < 8; i++)
     {
         Task* dataTable = LoadData("sharageDataTest.txt", "00" + std::to_string(i), dataSize,okValue);
-        int cost = CalculateCost<LinkedListQueue>(dataTable, dataSize, compareByDeliveryTime, compareByCoolingTime);
+        int cost = CalculateCost<LinkedListQueue>(dataTable, dataSize,timerOutput, compareByDeliveryTime, compareByCoolingTime);
 
-        std::cout << cost << " /  " << okValue;
+        std::cout << "Linked list queue " << i <<") " << cost << " / " << okValue;
 
-        if (cost == okValue) std::cout << " ........ OK!";
+        if (cost == okValue) std::cout << " \033[0;32mOK!\033[0m" << "  time consumed: " << timerOutput << " ns";
         std::cout << std::endl;
-
-   
-
     }
-   
     
     //---------------------------------
 
