@@ -139,13 +139,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CompareByCoolingTime.cpp" />
+    <ClCompile Include="CompareByDeliveryTime.cpp" />
+    <ClCompile Include="LinkedListQueue.cpp" />
     <ClCompile Include="Sharage.cpp" />
     <ClCompile Include="Task.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="sharageDataTest.txt" />
+    <Text Include="temp.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Comparator.h" />
+    <ClInclude Include="CompareByCoolingTime.h" />
+    <ClInclude Include="CompareByDeliveryTime.h" />
+    <ClInclude Include="LinkedListQueue.h" />
+    <ClInclude Include="PriorityQueue.h" />
     <ClInclude Include="Task.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

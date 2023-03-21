@@ -1,11 +1,14 @@
 ﻿#include <iostream>
-#include<fstream>
-#include<string>
+#include <fstream>
+#include <string>
 
 #include "Task.h"
+#include "PriorityQueue.h"
+#include "LinkedListQueue.h"
+#include "CompareByDeliveryTime.h"
+#include "CompareByCoolingTime.h"
 
-
-Task* LoadData(std::string dataFilePath, std::string dataLabel, int& dataSizeHandle)
+Task* LoadData(std::string dataFilePath, std::string dataLabel, int& dataSizeHandle, int& okValue)
 {
     std::ifstream dataFile;
     std::string line;
@@ -33,9 +36,15 @@ Task* LoadData(std::string dataFilePath, std::string dataLabel, int& dataSizeHan
             dataFile >> procesingTime;
             dataFile >> coolingTime;
 
-            output[i] = Task(deliveryTime, procesingTime, coolingTime);
+            output[i] = Task(deliveryTime, procesingTime, coolingTime,i);
         }
-     
+        
+        dataFile >> line;
+        dataFile >> line;
+        dataFile >> line;
+        dataFile >> okValue;
+
+
 
         dataFile.close();
     }
@@ -48,32 +57,72 @@ Task* LoadData(std::string dataFilePath, std::string dataLabel, int& dataSizeHan
 
 }
 
-int CalculateCost(Task* data, int orderLenght, int* order) 
+template<typename T> int CalculateCost(Task* dataTable,int dataSize, Comparator* compareByDeliveryTime, Comparator* compareByCoolingTime)
 {
     int uCost = 0;
     int tCost = 0;
+    Task* current = nullptr;
+    
+    PriorityQueue* pQueue = new T(compareByDeliveryTime);
+    PriorityQueue* redyTask = new T(compareByCoolingTime);
 
-    for (int i = 0; i < orderLenght; i++)
+    for (int i = 0; i < dataSize; i++)
     {
-        tCost = std::max(tCost, data[order[i] - 1].GetDeliveryTime()) + data[order[i] - 1].GetProcesingTime();
-        uCost = std::max(uCost, tCost + data[order[i] - 1].GetCoolingTime());
-      
+        pQueue->Insert(&dataTable[i]);
     }
 
+    while (!pQueue->IsEmpty() || !redyTask->IsEmpty())
+    {
+        
+        while(!pQueue->IsEmpty() && pQueue->Minimum()->GetDeliveryTime() <= tCost)
+        {
+            redyTask->Insert(pQueue->ExtractMinimum());
+        }
+
+        if (!redyTask->IsEmpty())
+            current = redyTask->ExtractMinimum();
+        else
+            current = pQueue->ExtractMinimum();
+
+
+        tCost = std::max(tCost, current->GetDeliveryTime()) + current->GetProcesingTime();
+        uCost = std::max(uCost, tCost + current->GetCoolingTime());
+
+    }
+
+    delete redyTask;
     return uCost;
 }
 
 int main()
 {
-    int taskOrder[50] = { 1, 45, 30, 28, 18, 25, 10, 21, 6, 48, 5, 13, 31, 7, 2, 4, 49, 11, 19, 33, 46, 32, 47, 23, 34,
-    50, 42, 14, 22, 29, 43, 8, 9, 36, 40, 37, 17, 38, 20, 39, 16, 24, 3, 35, 12, 41, 27, 44, 15, 26 };
-
+   
     int dataSize;
-    Task* dataTable = LoadData("sharageDataTest.txt","001",dataSize);
+    int okValue;
 
-  
+    Comparator* compareByDeliveryTime = new CompareByDeliveryTime();
+    Comparator* compareByCoolingTime  = new CompareByCoolingTime();
 
-    std::cout << std::endl << "Csot of " << CalculateCost(dataTable, dataSize, taskOrder) << std::endl;
+    PriorityQueue* pQueue = new LinkedListQueue(compareByDeliveryTime);
+    
+    //----------------------------------
+    for (int i = 0; i < 8; i++)
+    {
+        Task* dataTable = LoadData("sharageDataTest.txt", "00" + std::to_string(i), dataSize,okValue);
+        int cost = CalculateCost<LinkedListQueue>(dataTable, dataSize, compareByDeliveryTime, compareByCoolingTime);
+
+        std::cout << cost << " /  " << okValue;
+
+        if (cost == okValue) std::cout << " ........ OK!";
+        std::cout << std::endl;
+
+   
+
+    }
+   
+    
+    //---------------------------------
+
     return 0;
 }
 
