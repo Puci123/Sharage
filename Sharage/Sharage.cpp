@@ -2,12 +2,28 @@
 #include <fstream>
 #include <string>
 #include <chrono>
+#include <queue>
+#include <vector>
 
 #include "Task.h"
 #include "PriorityQueue.h"
 #include "LinkedListQueue.h"
 #include "CompareByDeliveryTime.h"
 #include "CompareByCoolingTime.h"
+#include "LTLQueue.h"
+
+
+Task* CreateRadnomData(int dataSize,int maxRange) 
+{
+    Task* data = new Task[dataSize];
+
+    for (int i = 0; i < dataSize; i++)
+    {
+        data[i] = Task(rand() % maxRange, rand() % maxRange, rand() % maxRange, -1);
+    }
+
+    return data;
+}
 
 Task* LoadData(std::string dataFilePath, std::string dataLabel, int& dataSizeHandle, int& okValue)
 {
@@ -58,73 +74,156 @@ Task* LoadData(std::string dataFilePath, std::string dataLabel, int& dataSizeHan
 
 }
 
-template<typename T> int CalculateCost(Task* dataTable,int dataSize,int &timerHandle , Comparator* compareByDeliveryTime, Comparator* compareByCoolingTime)
+int ShrageLinkedListQ(Task* dataTable,int dataSize,int &timerHandle)
 {
     int uCost = 0;
     int tCost = 0;
-    Task* current = nullptr;
-    
-    PriorityQueue* pQueue = new T(compareByDeliveryTime);
-    PriorityQueue* redyTask = new T(compareByCoolingTime);
+    Comparator* compareByDeliveryTime = new CompareByDeliveryTime();
+    Comparator* compareByCoolingTime = new CompareByCoolingTime();
+
+
+
+    LinkedListQueue storedTask(compareByDeliveryTime);
+    LinkedListQueue redyTask(compareByCoolingTime);
 
     auto start = std::chrono::high_resolution_clock::now();
 
     for (int i = 0; i < dataSize; i++)
     {
-        pQueue->Insert(&dataTable[i]);
+        storedTask.Insert(&dataTable[i]);
     }
 
-    while (!pQueue->IsEmpty() || !redyTask->IsEmpty())
+    while (!storedTask.IsEmpty() || !redyTask.IsEmpty())
     {
-        
-        while(!pQueue->IsEmpty() && pQueue->Minimum()->GetDeliveryTime() <= tCost)
+        Task* current = nullptr;
+
+
+        while(!storedTask.IsEmpty() && storedTask.Minimum()->GetDeliveryTime() <= tCost)
         {
-            redyTask->Insert(pQueue->ExtractMinimum());
+            redyTask.Insert(storedTask.ExtractMinimum());
         }
 
-        if (!redyTask->IsEmpty())
-            current = redyTask->ExtractMinimum();
+        if (!redyTask.IsEmpty())
+            current = redyTask.ExtractMinimum();
         else
-            current = pQueue->ExtractMinimum();
+            current = storedTask.ExtractMinimum();
 
 
         tCost = std::max(tCost, current->GetDeliveryTime()) + current->GetProcesingTime();
         uCost = std::max(uCost, tCost + current->GetCoolingTime());
-
     }
 
     auto stop = std::chrono::high_resolution_clock::now();
     timerHandle = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
   
-    delete redyTask;
+    //delete redyTask;
     return uCost;
 }
+
+int SharageSTL(Task* data,int dataSize, int &timerHandle) 
+{
+    int uCost = 0;
+    int tCost = 0;
+    Task curent;
+
+    std::priority_queue<Task, std::vector<Task>, CompareByDeliveryTime> storedTasks;
+    std::priority_queue<Task, std::vector<Task>, CompareByCoolingTime>  readyTasks;
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+
+    for (int i = 0; i < dataSize; i++)
+    {
+        storedTasks.push(data[i]);
+    }
+
+    while (!storedTasks.empty() || !readyTasks.empty())
+    {
+        
+        
+   
+        while (!storedTasks.empty() && storedTasks.top()._deliveryTime <= tCost)
+        {
+            readyTasks.push(storedTasks.top());
+            storedTasks.pop();
+        }
+        
+
+        if (!readyTasks.empty()) 
+        {
+            curent = readyTasks.top();
+            readyTasks.pop();
+
+        }
+        else
+        {
+            curent = storedTasks.top();
+            storedTasks.pop();
+        }
+
+        tCost = std::max(tCost, curent.GetDeliveryTime()) + curent.GetProcesingTime();
+        uCost = std::max(uCost, tCost + curent.GetCoolingTime());
+        
+    }
+    
+    auto stop = std::chrono::high_resolution_clock::now();
+    timerHandle = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
+
+    return uCost;
+}
+
 
 int main()
 {
    
-    int dataSize;
+    int dataSize = 500;
     int okValue;
-    int timerOutput;
+    int timerOutputSTL;
+    int timerOutputLinkedList;
 
-    Comparator* compareByDeliveryTime = new CompareByDeliveryTime();
-    Comparator* compareByCoolingTime  = new CompareByCoolingTime();
+    std::ofstream file;
 
-    PriorityQueue* pQueue = new LinkedListQueue(compareByDeliveryTime);
-    
-    std::cout << "\n\n";
+    file.open("test_otput2.csv",std::ios::ate);
+    file << "data size; STL time [ns]; linqued list time [ns]" << std::endl;
+    file.close();
+
+    std::cout << "\ndata size  STL time Linqed list queue time" << std::endl;
+
+
+    for (int dataSize = 1000; dataSize < 30000; dataSize += 1000)
+    {
+        Task* dataTable = CreateRadnomData(dataSize, 4000);
+        std::cout << dataSize << "  ";
+
+        SharageSTL(dataTable, dataSize, timerOutputSTL);
+        std::cout << timerOutputSTL << "  ";
+
+        ShrageLinkedListQ(dataTable, dataSize, timerOutputLinkedList);
+        std::cout << timerOutputSTL << std::endl;
+
+        
+        file.open("test_otput2.csv", std::ios::app);
+        file << dataSize << ";" << timerOutputSTL << ";" << timerOutputLinkedList << std::endl;
+        file.close();
+
+        delete[] dataTable;
+    }
+
 
     //----------------------------------
-    for (int i = 1; i < 8; i++)
-    {
-        Task* dataTable = LoadData("sharageDataTest.txt", "00" + std::to_string(i), dataSize,okValue);
-        int cost = CalculateCost<LinkedListQueue>(dataTable, dataSize,timerOutput, compareByDeliveryTime, compareByCoolingTime);
 
-        std::cout << "Linked list queue " << i <<") " << cost << " / " << okValue;
+    //for (int i = 0; i < 8; i++)
+    //{
+    //    Task* dataTable = LoadData("sharageDataTest.txt", "00" + std::to_string(i), dataSize,okValue);
+    //    int cost = SharageSTL(dataTable, dataSize, timerOutput);
+    //    //int cost = ShrageLinkedListQ(dataTable, dataSize, timerOutput);
 
-        if (cost == okValue) std::cout << " \033[0;32mOK!\033[0m" << "  time consumed: " << timerOutput << " ns";
-        std::cout << std::endl;
-    }
+
+    //    std::cout << "Linked list queue " << i <<") " << cost << " / " << okValue;
+
+    //    if (cost == okValue) std::cout << " \033[;32mOK!\033[0m" << "  time consumed: " << timerOutput << " ns";
+    //    std::cout << std::endl;
+    //}
     
     //---------------------------------
 

@@ -1,6 +1,6 @@
 #pragma once
 
-class Task
+ class Task
 {
 	public:
 		Task(int deliveryTime, int procesingTime, int coolingTime, int index);
@@ -8,14 +8,12 @@ class Task
 		~Task();
 
 
-		bool operator < (Task &task);
-
-		int GetDeliveryTime();
-		int GetProcesingTime();
-		int GetCoolingTime();
-		int GetIndex();
+		const int GetDeliveryTime();
+		const int GetProcesingTime();
+		const int GetCoolingTime();
+		const int GetIndex();
 	
-private:
+
 		int _deliveryTime;
 		int _procesingTime;
 		int _coolingTime;

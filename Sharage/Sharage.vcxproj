@@ -154,7 +154,6 @@
     <ClInclude Include="CompareByCoolingTime.h" />
     <ClInclude Include="CompareByDeliveryTime.h" />
     <ClInclude Include="LinkedListQueue.h" />
-    <ClInclude Include="PriorityQueue.h" />
     <ClInclude Include="Task.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -43,9 +43,6 @@
     <ClInclude Include="Task.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="PriorityQueue.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="LinkedListQueue.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>

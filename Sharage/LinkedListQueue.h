@@ -3,15 +3,15 @@
 #include <iostream>
 #include "Comparator.h"
 
-class LinkedListQueue : public PriorityQueue
+class LinkedListQueue
 {
 	public:
 		LinkedListQueue(Comparator* comparator);
 
-		 void Insert(Task *task)		override;			
-		 Task* Minimum()				override;
-		 Task* ExtractMinimum()			override;
-		 bool IsEmpty()					override;
+		void Insert(Task* task);
+		 Task* Minimum();
+		 Task* ExtractMinimum();
+		 bool IsEmpty();
 
 	private:
 		
