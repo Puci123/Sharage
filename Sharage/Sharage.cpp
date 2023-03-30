@@ -6,11 +6,9 @@
 #include <vector>
 
 #include "Task.h"
-#include "PriorityQueue.h"
 #include "LinkedListQueue.h"
 #include "CompareByDeliveryTime.h"
 #include "CompareByCoolingTime.h"
-#include "LTLQueue.h"
 
 
 Task* CreateRadnomData(int dataSize,int maxRange) 
