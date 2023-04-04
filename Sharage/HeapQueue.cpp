@@ -10,41 +10,39 @@ void swap(Task* x, Task* y)
 
 HeapQueue::HeapQueue(int cap, Comparator* c)
 {
-	heap_size = 0;
-	capacity = cap;
-	harr = new Task[cap];
-	comp = c;
+	_heap_size = 0;
+	_capacity = cap;
+	_heap = new Task[cap];
+	_comp = c;
 }
 
-void HeapQueue::insertKey(Task k)
+void HeapQueue::Insert(Task k)
 {
 
-	heap_size++;
-	int i = heap_size - 1;
-	harr[i] = k;
+	_heap_size++;
+	int i = _heap_size - 1;
+	_heap[i] = k;
 
-	while (i != 0 && !comp->Compare(harr[parent(i)],harr[i]))
+	while (i != 0 && !_comp->Compare(_heap[parent(i)],_heap[i]))
 	{
-		swap(&harr[i], &harr[parent(i)]);
+		swap(&_heap[i], &_heap[parent(i)]);
 		i = parent(i);
 	}
 }
 
 
-Task HeapQueue::extractMin()
+Task HeapQueue::ExtractMin()
 {
-	if (heap_size <= 0)
-		return Task();
-
-	if (heap_size == 1)
+	
+	if (_heap_size == 1)
 	{
-		heap_size--;
-		return harr[0];
+		_heap_size--;
+		return _heap[0];
 	}
 
-	Task root = harr[0];
-	harr[0] = harr[heap_size - 1];
-	heap_size--;
+	Task root = _heap[0];
+	_heap[0] = _heap[_heap_size - 1];
+	_heap_size--;
 	MinHeapify(0);
 
 	return root;
@@ -52,7 +50,7 @@ Task HeapQueue::extractMin()
 
 HeapQueue::~HeapQueue()
 {
-	delete[] harr;
+	delete[] _heap;
 }
 
 void HeapQueue::MinHeapify(int i)
@@ -60,20 +58,20 @@ void HeapQueue::MinHeapify(int i)
 	int l = left(i);
 	int r = right(i);
 	int smallest = i;
-	if (l < heap_size && comp->Compare(harr[l], harr[i]))
+	if (l < _heap_size && _comp->Compare(_heap[l], _heap[i]))
 		smallest = l;
-	if (r < heap_size && comp->Compare(harr[r], harr[smallest]))
+	if (r < _heap_size && _comp->Compare(_heap[r], _heap[smallest]))
 		smallest = r;
 	if (smallest != i)
 	{
-		swap(&harr[i], &harr[smallest]);
+		swap(&_heap[i], &_heap[smallest]);
 		MinHeapify(smallest);
 	}
 }
 
-bool HeapQueue::isEmpty() 
+bool HeapQueue::IsEmpty() 
 {
-	return heap_size == 0;
+	return _heap_size == 0;
 }
 
 

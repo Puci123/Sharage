@@ -1,7 +1,7 @@
 #pragma once
 #include "Comparator.h"
 
-static class CompareByCoolingTime : public Comparator
+class CompareByCoolingTime : public Comparator
 {
 	public:
 		CompareByCoolingTime();

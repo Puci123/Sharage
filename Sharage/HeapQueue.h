@@ -6,10 +6,10 @@
 class HeapQueue
 {
 	private:
-		Task* harr;
-		Comparator* comp;
-		int capacity;
-		int heap_size;
+		Task* _heap;
+		Comparator* _comp;
+		int _capacity;
+		int _heap_size;
 	public:
 		HeapQueue(int capacity,Comparator* comparator);
 		~HeapQueue();
@@ -23,12 +23,12 @@ class HeapQueue
 
 		int right(int i) { return (2 * i + 2); }
 
-		Task extractMin();
+		Task ExtractMin();
 
-		Task getMin() { return harr[0]; }
+		Task Min() { return _heap[0]; }
 
-		void insertKey(Task k);
+		void Insert(Task k);
 
-		bool isEmpty();
+		bool IsEmpty();
 };
 
