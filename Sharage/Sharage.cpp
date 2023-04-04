@@ -9,7 +9,7 @@
 #include "LinkedListQueue.h"
 #include "CompareByDeliveryTime.h"
 #include "CompareByCoolingTime.h"
-
+#include "HeapQueue.h"
 
 Task* CreateRadnomData(int dataSize,int maxRange) 
 {
@@ -91,6 +91,8 @@ int ShrageLinkedListQ(Task* dataTable,int dataSize,int &timerHandle)
         storedTask.Insert(&dataTable[i]);
     }
 
+    int k = 0;
+
     while (!storedTask.IsEmpty() || !redyTask.IsEmpty())
     {
         Task* current = nullptr;
@@ -134,7 +136,7 @@ int SharageSTL(Task* data,int dataSize, int &timerHandle)
     {
         storedTasks.push(data[i]);
     }
-
+    int klak = 0;
     while (!storedTasks.empty() || !readyTasks.empty())
     {
         
@@ -170,50 +172,93 @@ int SharageSTL(Task* data,int dataSize, int &timerHandle)
     return uCost;
 }
 
+int ShrageHeap(Task* dataTable, int dataSize, int& timerHandle) 
+{
+    int uCost = 0;
+    int tCost = 0;
+
+    Comparator* compareByDeliveryTime = new CompareByDeliveryTime();
+    Comparator* compareByCoolingTime = new CompareByCoolingTime();
+
+    HeapQueue storedTask(dataSize,compareByDeliveryTime);
+    HeapQueue readyTask(dataSize, compareByCoolingTime);
+    
+    auto start = std::chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < dataSize; i++)
+    {
+        storedTask.insertKey(dataTable[i]);
+    }
+    
+    while (!storedTask.isEmpty())
+    {
+
+        while (!storedTask.isEmpty() && storedTask.getMin()._deliveryTime <= tCost)
+        {
+            readyTask.insertKey(storedTask.extractMin());
+        }
+
+        Task current;
+        if (!readyTask.isEmpty())
+            current = readyTask.extractMin();
+        else
+            current = storedTask.extractMin();
+
+        tCost = std::max(tCost, current.GetDeliveryTime()) + current.GetProcesingTime();
+        uCost = std::max(uCost, tCost + current.GetCoolingTime());
+    }
+    auto stop = std::chrono::high_resolution_clock::now();
+    timerHandle = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
+
+    return uCost;
+
+}
 
 int main()
 {
    
-    int dataSize = 500;
     int okValue;
-    int timerOutputSTL;
-    int timerOutputLinkedList;
+    int timerOutput = 0;
+   
 
+    std::string path = "heap_data2.csv";
     std::ofstream file;
 
-    file.open("test_otput2.csv",std::ios::ate);
-    file << "data size; STL time [ns]; linqued list time [ns]" << std::endl;
+    file.open(path,std::ios::ate);
+    file << "data size; Heap time [ns];" << std::endl;
     file.close();
 
     std::cout << "\ndata size  STL time Linqed list queue time" << std::endl;
 
 
-    for (int dataSize = 1000; dataSize < 30000; dataSize += 1000)
+    for (int dataSize = 0; dataSize < 100000; dataSize += 10000)
     {
-        Task* dataTable = CreateRadnomData(dataSize, 4000);
-        std::cout << dataSize << "  ";
 
-        SharageSTL(dataTable, dataSize, timerOutputSTL);
-        std::cout << timerOutputSTL << "  ";
+        for (int i = 0; i < 1; i++)
+        {
+          
+            std::cout << dataSize << "  ";
+            Task* dataTable = CreateRadnomData(dataSize, 4000);
+            ShrageHeap(dataTable, dataSize, timerOutput);
+            std::cout << timerOutput << std::endl;
 
-        ShrageLinkedListQ(dataTable, dataSize, timerOutputLinkedList);
-        std::cout << timerOutputSTL << std::endl;
 
-        
-        file.open("test_otput2.csv", std::ios::app);
-        file << dataSize << ";" << timerOutputSTL << ";" << timerOutputLinkedList << std::endl;
-        file.close();
+            file.open(path, std::ios::app);
+            file << dataSize << ";" << timerOutput << std::endl;
+            file.close();
 
-        delete[] dataTable;
+            delete[] dataTable;
+        }
     }
 
 
     //----------------------------------
 
+    //int timerOutput;
     //for (int i = 0; i < 8; i++)
     //{
-    //    Task* dataTable = LoadData("sharageDataTest.txt", "00" + std::to_string(i), dataSize,okValue);
-    //    int cost = SharageSTL(dataTable, dataSize, timerOutput);
+    //    Task* dataTable = LoadData("sharageDataTest.txt", "00" + std::to_string(i), dataSize,okValue);    
+    //    int cost = ShrageHeap(dataTable, dataSize, timerOutput);
     //    //int cost = ShrageLinkedListQ(dataTable, dataSize, timerOutput);
 
 
@@ -224,6 +269,11 @@ int main()
     //}
     
     //---------------------------------
+
+   /* Comparator* compareByDeliveryTime = new CompareByDeliveryTime();
+    HeapQueue storedTask(compareByDeliveryTime);
+    storedTask.Insert(Task(1, 1, 1, 1));*/
+
 
     return 0;
 }

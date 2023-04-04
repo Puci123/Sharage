@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="CompareByCoolingTime.cpp" />
     <ClCompile Include="CompareByDeliveryTime.cpp" />
+    <ClCompile Include="HeapQueue.cpp" />
     <ClCompile Include="LinkedListQueue.cpp" />
     <ClCompile Include="Sharage.cpp" />
     <ClCompile Include="Task.cpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="Comparator.h" />
     <ClInclude Include="CompareByCoolingTime.h" />
     <ClInclude Include="CompareByDeliveryTime.h" />
+    <ClInclude Include="HeapQueue.h" />
     <ClInclude Include="LinkedListQueue.h" />
     <ClInclude Include="Task.h" />
   </ItemGroup>
